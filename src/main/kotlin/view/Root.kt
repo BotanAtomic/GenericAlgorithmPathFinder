@@ -3,7 +3,6 @@ package view
 import algorithm.findSolution
 import javafx.geometry.Point2D
 import javafx.scene.control.TextField
-import javafx.scene.control.ToggleButton
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.AnchorPane
 import javafx.scene.paint.Color
@@ -21,8 +20,10 @@ class Root : View() {
     private val canvas: AnchorPane by fxid()
 
     private val cellSizeInput: TextField by fxid("cellWidth")
+    private val maxInput: TextField by fxid("maxAttempt")
 
     private var cellSize: Int = 0;
+    private var maxAttempt: Int = 20;
 
     private val info: Text by fxid()
 
@@ -88,16 +89,17 @@ class Root : View() {
 
         for ((i, values) in map.iterator().withIndex()) {
             for ((j, value) in values.iterator().withIndex()) {
-                if (value > 0) {
-                    val block = Rectangle()
+                val block = Rectangle()
 
-                    block.fill = when (value) {
-                        1 -> Color.BLACK
-                        2 -> Color.GREEN
-                        3 -> Color.RED
-                        else -> Color.BEIGE
-                    }
+                block.fill = when (value) {
+                    -1 -> Color.ORANGE
+                    1 -> Color.BLACK
+                    2 -> Color.GREEN
+                    3 -> Color.RED
+                    else -> null
+                }
 
+                if (block.fill != null) {
                     block.apply {
                         x = i * step
                         y = j * step
@@ -121,9 +123,11 @@ class Root : View() {
 
         if (cellSizeInput.text.isNullOrBlank() || cellSizeInput.text.toIntOrNull() == null) {
             cellSizeInput.text = "20"
+            maxInput.text = "20"
         }
 
         cellSize = cellSizeInput.text.toInt()
+        maxAttempt = maxInput.text.toInt()
 
         println("Init with cell width $cellSize [$height/$width]")
 
@@ -150,18 +154,43 @@ class Root : View() {
     }
 
     fun findPath() {
-        println("Before $start")
-        val solution = findSolution(
-            size = cellSize,
-            map = map,
-            start = start,
-            end = end,
-            draw = { draw() }
-        )
-        start = solution.first
-        generation = solution.second
-        println("After $start")
+        for ((i, values) in map.iterator().withIndex())
+            for ((j, v) in values.iterator().withIndex())
+                if (v < 0)
+                    map[i][j] = 0
 
-        onCanvasEvent(start.x.toInt(), start.y.toInt(), 2)
+        if (maxInput.text.isNullOrBlank() || maxInput.text.toIntOrNull() == null)
+            maxInput.text = "20"
+
+        maxAttempt = maxInput.text.toInt()
+
+        println("Before $start")
+
+        runAsync {
+            val solution = findSolution(
+                size = cellSize,
+                map = map,
+                start = start,
+                end = end,
+                draw = { draw() },
+                max = maxAttempt
+            )
+            generation = solution.second
+
+            for ((i, values) in map.iterator().withIndex())
+                for ((j, v) in values.iterator().withIndex())
+                    if (v < 0)
+                        map[i][j] = 0
+
+            solution.first?.points?.forEach {
+                if (map[it.x.toInt()][it.y.toInt()] == 0) {
+                    map[it.x.toInt()][it.y.toInt()] = -1
+                }
+            }
+            println("After $start")
+        } ui {
+            draw()
+        }
+
     }
 }

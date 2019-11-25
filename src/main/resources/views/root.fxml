@@ -14,6 +14,7 @@
       <VBox alignment="TOP_CENTER" layoutX="575.0" layoutY="252.0" prefWidth="200.0" spacing="20.0" style="-fx-border-color: grey; -fx-border-width: 0 0 0 0.3; -fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <TextField fx:id="cellWidth" maxWidth="117.0" minHeight="10.0" minWidth="10.0" prefHeight="26.0" prefWidth="117.0" />
+            <TextField fx:id="maxAttempt" maxWidth="117.0" minHeight="10.0" minWidth="10.0" prefHeight="26.0" prefWidth="117.0" />
             <Button fx:id="init" mnemonicParsing="false" onMouseClicked="#initCanvas" text="Initialize" />
             <Button fx:id="init1" mnemonicParsing="false" onMouseClicked="#findPath" text="FIND PATH" />
             <Separator prefWidth="200.0" />
